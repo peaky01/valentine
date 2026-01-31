@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ma Valentine 💘</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #ffb6c1, #ffd1dc);
+      overflow: hidden;
+    }
+
+    .card {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 460px;
+      position: relative;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      color: #ff4d6d;
+    }
+
+    p {
+      margin: 0 0 22px;
+      font-size: 17px;
+      color: #444;
+      font-weight: 600;
+    }
+
+    #hint {
+      margin-top: -10px;
+      margin-bottom: 18px;
+      font-size: 14px;
+      color: #777;
+      font-weight: 600;
+    }
+
+    .btns {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      position: relative;
+      height: 70px;
+    }
+
+    button {
+      border: none;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      font-weight: bold;
+      user-select: none;
+    }
+
+    #yesBtn {
+      background: #ff4d6d;
+      color: white;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    #yesBtn:hover { transform: scale(1.04); }
+
+    #noBtn {
+      background: #f1f1f1;
+      color: #555;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+
+    /* écran final */
+    .final { display: none; }
+
+    .final h1 { font-size: 30px; }
+
+    .heart {
+      font-size: 44px;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    /* confettis */
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      top: -10px;
+      animation: fall 3s linear infinite;
+      opacity: 0.85;
+    }
+
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="mainCard">
+    <h1>💘 Mon amour 💘</h1>
+    <p>Bubuta mea vrei sa fii ma valentine ❤️ ?</p>
+    <div id="hint">Essaie d’attraper le OUI 😘</div>
+
+    <div class="btns" id="btnContainer">
+      <button id="yesBtn">OUI 💖</button>
+      <button id="noBtn">NON 😭</button>
+    </div>
+  </div>
+
+  <div class="card final" id="finalCard">
+    <h1>OUIIIII 😍💖</h1>
+    <p>Tu viens de rendre mon cœur encore plus heureux 💕</p>
+    <div class="heart">❤️</div>
+    <p style="margin-top:20px;">Je t’aime fort ✨</p>
+  </div>
+
+  <script>
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const mainCard = document.getElementById("mainCard");
+    const finalCard = document.getElementById("finalCard");
+    const btnContainer = document.getElementById("btnContainer");
+    const hint = document.getElementById("hint");
+
+    let escapesLeft = 6;  // ✅ nombre de fois où OUI s'échappe
+    let yesUnlocked = false;
+
+    function moveYesButton() {
+      if (yesUnlocked) return;
+
+      const containerRect = btnContainer.getBoundingClientRect();
+      const btnRect = yesBtn.getBoundingClientRect();
+
+      const maxX = containerRect.width - btnRect.width;
+      const maxY = containerRect.height - btnRect.height;
+
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+
+      yesBtn.style.left = `${x}px`;
+      yesBtn.style.top = `${y}px`;
+
+      escapesLeft--;
+
+      if (escapesLeft <= 0) {
+        yesUnlocked = true;
+        hint.textContent = "Ok ok 😭 tu peux cliquer maintenant 💖";
+        // on recentre OUI pour qu'elle puisse cliquer facilement
+        yesBtn.style.left = "0px";
+        yesBtn.style.top = "0px";
+      } else {
+        hint.textContent = `Essaie d’attraper le OUI 😘 (encore ${escapesLeft})`;
+      }
+    }
+
+    // OUI s'échappe quand on approche
+    yesBtn.addEventListener("mouseenter", moveYesButton);
+
+    // Sur mobile il n'y a pas "mouseenter", donc on fait au touch aussi
+    yesBtn.addEventListener("touchstart", (e) => {
+      if (!yesUnlocked) {
+        e.preventDefault();
+        moveYesButton();
+      }
+    }, { passive: false });
+
+    // Une fois débloqué, OUI devient cliquable ✅
+    yesBtn.addEventListener("click", () => {
+      if (!yesUnlocked) {
+        moveYesButton();
+        return;
+      }
+      mainCard.style.display = "none";
+      finalCard.style.display = "block";
+      launchConfetti();
+    });
+
+    // NON -> page finale aussi (hihi)
+    noBtn.addEventListener("click", () => {
+      mainCard.style.display = "none";
+      finalCard.style.display = "block";
+      launchConfetti();
+    });
+
+    function launchConfetti() {
+      for (let i = 0; i < 90; i++) {
+        const confetti = document.createElement("div");
+        confetti.classList.add("confetti");
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + "s";
+        confetti.style.backgroundColor = randomColor();
+        document.body.appendChild(confetti);
+
+        setTimeout(() => confetti.remove(), 4000);
+      }
+    }
+
+    function randomColor() {
+      const colors = ["#ff4d6d", "#ff9aa2", "#ffd1dc", "#fff1f3", "#ff6f91"];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+  </script>
+</body>
+</html>
